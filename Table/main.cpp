@@ -12,33 +12,48 @@
 #include <conio.h>
 using namespace std;
 
-// Windows console colors
+// Цвета для консоли Windows
 enum Colors {
-    BLACK = 0,
-    BLUE = 1,
-    GREEN = 2,
-    CYAN = 3,
-    RED = 4,
-    MAGENTA = 5,
-    YELLOW = 6,
-    WHITE = 7,
-    BRIGHT_BLUE = 9,
-    BRIGHT_GREEN = 10,
-    BRIGHT_CYAN = 11,
-    BRIGHT_RED = 12,
-    BRIGHT_MAGENTA = 13,
-    BRIGHT_YELLOW = 14,
-    BRIGHT_WHITE = 15
+    BLACK = 0,          // Черный
+    BLUE = 1,           // Синий
+    GREEN = 2,          // Зеленый
+    CYAN = 3,           // Голубой
+    RED = 4,            // Красный
+    MAGENTA = 5,        // Пурпурный
+    YELLOW = 6,         // Желтый
+    WHITE = 7,          // Белый
+    BRIGHT_BLUE = 9,    // Яркий синий
+    BRIGHT_GREEN = 10,  // Яркий зеленый
+    BRIGHT_CYAN = 11,   // Яркий голубой
+    BRIGHT_RED = 12,    // Яркий красный
+    BRIGHT_MAGENTA = 13,// Яркий пурпурный
+    BRIGHT_YELLOW = 14, // Яркий желтый
+    BRIGHT_WHITE = 15   // Яркий белый
 };
 
+// Типы таблиц в программе
+enum TTabMode { 
+    SCAN_TABLE = 1,     // Последовательная таблица
+    SORT_TABLE = 2,     // Отсортированная таблица
+    HASH_TABLE1 = 3,    // Хеш-таблица
+    HASH_TABLE2 = 4,    // Хеш-таблица с цепочками
+    TREE_TABLE = 5,     // Дерево
+    BAL_TREE_TABLE = 6  // Сбалансированное дерево
+};
+
+// Функции для работы с консолью
+
+// Устанавливает цвет текста в консоли
 void setColor(int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
 
+// Очищает экран консоли
 void clearScreen() {
     system("cls");
 }
 
+// Устанавливает позицию курсора в консоли
 void setCursorPosition(int x, int y) {
     COORD coord;
     coord.X = x;
@@ -46,6 +61,7 @@ void setCursorPosition(int x, int y) {
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
+// Скрывает курсор в консоли
 void hideCursor() {
     CONSOLE_CURSOR_INFO cursorInfo;
     GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
@@ -53,6 +69,7 @@ void hideCursor() {
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
 
+// Показывает курсор в консоли
 void showCursor() {
     CONSOLE_CURSOR_INFO cursorInfo;
     GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
@@ -60,44 +77,90 @@ void showCursor() {
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
 
+//// Выводит текст по центру экрана
 void printCentered(const string& text, int y) {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    int x = (width - text.length()) / 2;
+    int x = (width - text.length()) / 4;
     setCursorPosition(x, y);
     cout << text;
 }
+//void printCentered(const string& text, int y) {
+//    // Получаем информацию о размерах консоли
+//    CONSOLE_SCREEN_BUFFER_INFO csbi;
+//    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+//    int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+//    
+//    // Удаляем лишние пробелы и табуляции в начале и конце текста
+//    string trimmedText = text;
+//    while (!trimmedText.empty() && (trimmedText[0] == ' ' || trimmedText[0] == '\t')) {
+//        trimmedText.erase(0, 1);
+//    }
+//    while (!trimmedText.empty() && (trimmedText.back() == ' ' || trimmedText.back() == '\t')) {
+//        trimmedText.pop_back();
+//    }
+//    
+//    // Вычисляем позицию для центрирования текста
+//    int x = (width - trimmedText.length()) / 2;
+//    setCursorPosition(x, y);
+//    cout << trimmedText;
+//}
 
+// Выводит пункт меню с подсветкой выбранного элемента
 void printMenuOption(const string& text, int x, int y, bool selected) {
     setCursorPosition(x, y);
     if (selected) {
-        setColor(BRIGHT_GREEN);
+        setColor(BRIGHT_GREEN);  // Выбранный пункт выделяем ярко-зеленым
         cout << "> " << text;
     } else {
-        setColor(WHITE);
+        setColor(WHITE);         // Невыбранный пункт выводим белым
         cout << "  " << text;
     }
     setColor(WHITE);
 }
 
-void printHeader() {
+// Возвращает название типа таблицы
+string getTableTypeName(TTabMode mode) {
+    switch (mode) {
+        case SCAN_TABLE:
+            return "Последовательная таблица";
+        case SORT_TABLE:
+            return "Отсортированная таблица";
+        case HASH_TABLE1:
+            return "Хеш-таблица";
+        case HASH_TABLE2:
+            return "Хеш-таблица с цепочками";
+        case TREE_TABLE:
+            return "Дерево";
+        case BAL_TREE_TABLE:
+            return "Сбалансированное дерево";
+        default:
+            return "Неизвестный тип";
+    }
+}
+
+// Выводит заголовок меню с информацией о текущем типе таблицы
+void printHeader(TTabMode mode) {
     clearScreen();
     setColor(BRIGHT_BLUE);
-    printCentered("=== УПРАВЛЕНИЕ ТАБЛИЦАМИ ===", 1);
+    printCentered("=== УПРАВЛЕНИЕ ТАБЛИЦАМИ И ДЕРЕВЬЯМИ ===", 1);
+    setColor(BRIGHT_GREEN);
+    printCentered(getTableTypeName(mode), 2);
     setColor(BRIGHT_CYAN);
-    printCentered("Выберите действие с помощью стрелок ↑↓", 2);
+    printCentered(" > Выберите действие с помощью стрелок ↑↓", 3);
     setColor(WHITE);
     cout << endl;
 }
 
+// Выводит строку с поддержкой Unicode
 void printUnicodeString(const string& str) {
-    // Convert string to wide string
+    // Конвертируем строку в широкий формат для поддержки Unicode
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
     wstring wstr(size_needed, 0);
     MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstr[0], size_needed);
     
-    // Write to console
+    // Выводим строку в консоль
     WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), wstr.c_str(), (DWORD)wstr.size(), NULL, NULL);
 }
 
@@ -105,7 +168,18 @@ template <typename TKey, typename TVal>
 void PrintTable(Table<TKey, TVal>& table, const string& tableName) {
     cout << "\n";
     printUnicodeString(tableName);
-    printUnicodeString(" contents:\n");
+    printUnicodeString(", содержание:\n");
+    
+    if (dynamic_cast<BalTreeTable<TKey, TVal>*>(&table)) {
+        auto* treeTab = dynamic_cast<BalTreeTable<TKey, TVal>*>(&table);
+        if (treeTab) {
+            setColor(BRIGHT_CYAN);
+            printUnicodeString("Структура сбалансированного дерева (числа в скобках - факторы баланса):\n");
+            setColor(WHITE);
+            treeTab->PrintTree();
+            return;
+        }
+    }
     
     table.Reset();
     while (!table.IsEnd()) {
@@ -123,9 +197,6 @@ void PrintTable(Table<TKey, TVal>& table, const string& tableName) {
     setColor(WHITE);
 }
 
-enum TTabMode { SCAN_TABLE = 1, SORT_TABLE = 2, HASH_TABLE1 = 3, HASH_TABLE2 = 4, TREE_TABLE=5, BAL_TREE_TABLE = 6
-};
-
 Table<int, string>* pTab = nullptr;
 int* pKeys = nullptr;
 string* pVals = nullptr;
@@ -134,7 +205,7 @@ int DataCount = 0, MemSize = 0;
 void CreateTable(TTabMode mode) {
     int MaxKey;
     clearScreen();
-    printHeader();
+    printHeader(mode);
     
     while (true) {
         setCursorPosition(10, 5);
@@ -150,7 +221,7 @@ void CreateTable(TTabMode mode) {
             setColor(WHITE);
             _getch();
             clearScreen();
-            printHeader();
+            printHeader(mode);
             continue;
         }
         break;
@@ -170,7 +241,7 @@ void CreateTable(TTabMode mode) {
             setColor(WHITE);
             _getch();
             clearScreen();
-            printHeader();
+            printHeader(mode);
             setCursorPosition(10, 5);
             setColor(BRIGHT_YELLOW);
             printUnicodeString("Введите количество записей: ");
@@ -243,7 +314,7 @@ bool ProcessTable(TTabMode mode) {
     bool running = true;
 
     while (running) {
-        printHeader();
+        printHeader(mode);
         
         // Print menu items
         for (int i = 0; i < MENU_ITEMS; i++) {
@@ -274,7 +345,7 @@ bool ProcessTable(TTabMode mode) {
 
                 case 1: // Search
                     clearScreen();
-                    printHeader();
+                    printHeader(mode);
                     setCursorPosition(10, 5);
                     setColor(BRIGHT_YELLOW);
                     cout << "Введите ключ: ";
@@ -300,7 +371,7 @@ bool ProcessTable(TTabMode mode) {
 
                 case 2: // Insert
                     clearScreen();
-                    printHeader();
+                    printHeader(mode);
                     setCursorPosition(10, 5);
                     setColor(BRIGHT_YELLOW);
                     cout << "Введите ключ: ";
@@ -338,7 +409,7 @@ bool ProcessTable(TTabMode mode) {
 
                 case 3: // Delete
                     clearScreen();
-                    printHeader();
+                    printHeader(mode);
                     setCursorPosition(10, 5);
                     setColor(BRIGHT_YELLOW);
                     cout << "Введите ключ: ";
@@ -370,7 +441,7 @@ bool ProcessTable(TTabMode mode) {
 
                 case 4: // Print
                     clearScreen();
-                    printHeader();
+                    printHeader(mode);
                     pTab->ClearEff();
                     if (mode == HASH_TABLE2) {
                         auto* hashTab = dynamic_cast<ListHashTable<int, string>*>(pTab);
@@ -447,7 +518,7 @@ int main() {
     bool running = true;
 
     while (running) {
-        printHeader();
+        printHeader((TTabMode)(selectedType + 1));
         
         // Print table type selection menu
         for (int i = 0; i < TABLE_TYPES; i++) {
