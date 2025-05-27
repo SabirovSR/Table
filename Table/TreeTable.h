@@ -42,7 +42,6 @@ public:
         return false;
     }
 
-
     bool Find(TKey key) {
         pCurr = pRoot;
         pPrev = nullptr;
@@ -85,7 +84,6 @@ public:
         this->DataCount++;
         this->Eff++;
     }
-
 
     void Delete(TKey key) {
         if (!Find(key)) return;
@@ -155,45 +153,31 @@ public:
         return pos >= this->DataCount;
     }
 
-    /*void PrintRec(ostream& os, TreeNode<TKey, TVal>* p, int level = 0) {
-        if (p == nullptr) return;
-        for (int i = 0; i < level; i++) os << "  ";
-        os << p->rec.key << endl;
-        PrintRec(os, p->pRight, level + 1);
-        PrintRec(os, p->pLeft, level + 1);
-    }
-
-    void Print(ostream& os) {
-        PrintRec(os, pRoot);
-    }*/
-
     void PrintRec(ostream& os, TreeNode<TKey, TVal>* p, string prefix = "", bool isLeft = true) {
         if (p == nullptr) return;
 
         os << prefix;
-        os << (isLeft ? "|--" : "\\--");
-        os << p->rec.key << ": " << p->rec.val << endl;
+        os << (isLeft ? "└── " : "┌── ");
+        os << p->rec.key << " (" << p->rec.val << ")" << endl;
 
-        string childPrefix = prefix + (isLeft ? "|   " : "    ");
-
+        string childPrefix = prefix + (isLeft ? "    " : "│   ");
         
+        // Сначала выводим правое поддерево (большие значения)
         PrintRec(os, p->pRight, childPrefix, false);
-        
+        // Затем выводим левое поддерево (меньшие значения)
         PrintRec(os, p->pLeft, childPrefix, true);
     }
 
     void Print(ostream& os) {
         if (pRoot == nullptr) {
-            os << "������ �����\n";
+            os << "Пустое дерево\n";
             return;
         }
-        os << pRoot->rec.key << ": " << pRoot->rec.val << endl;
-        PrintRec(os, pRoot->pRight, "", false);
-        PrintRec(os, pRoot->pLeft, "", true);
+        os << "Дерево (большие значения сверху, меньшие снизу):\n";
+        os << "┌── " << pRoot->rec.key << " (" << pRoot->rec.val << ")" << endl;
+        PrintRec(os, pRoot->pRight, "│   ", false);
+        PrintRec(os, pRoot->pLeft, "│   ", true);
     }
-
-
-
 
     Record<TKey, TVal> getCurr() override {
         return pCurr ? pCurr->rec : Record<TKey, TVal>{};
@@ -223,12 +207,10 @@ public:
             } while (usedKeys[key]);
 
             usedKeys[key] = true;
-            //int val = rand() % 2000 - 1000;
             string val = "value_" + to_string(rand() % 1000);
             this->Insert(Record<TKey, TVal>(key, val));
         }
     }
-
 
     void clrTab() override {
         clearTree(pRoot);
@@ -246,6 +228,4 @@ public:
         clearTree(pNode->pRight);
         delete pNode;
     }
-
-
 };

@@ -33,7 +33,6 @@ public:
     virtual TKey getCurrKey() = 0;
     virtual TVal getCurrVal() = 0;
     virtual void fillTab(int size, int keyrange) = 0;
-    //virtual void printTab(std::string filename) = 0;
     virtual void clrTab() = 0;
 };
 
@@ -44,10 +43,8 @@ std::ostream& operator<<(std::ostream& os, Table<TKey, TVal>& tab)
   
     while (!tab.IsEnd())
     {
-        os << "Êëþ÷: " << tab.getCurrKey() << ", Çíà÷åíèå: " << tab.getCurrVal() << '\n';
+        os << "ÐšÐ»ÑŽÑ‡: " << tab.getCurrKey() << ", Ð—Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ: " << tab.getCurrVal() << '\n';
         tab.GoNext();
     }
     return os;
 }
-
-

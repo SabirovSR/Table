@@ -36,7 +36,6 @@ public:
 
     void Insert(Record<TKey, TVal> rec) override
     {
-        
         bool res = this->Find(rec.key);
         if (res) throw runtime_error("Key already exists");
 
@@ -84,7 +83,6 @@ public:
             } while (usedKeys[key]);
 
             usedKeys[key] = true;
-            //int val = rand() % 2000 - 1000;
             string val = to_string(rand() % 1000);
             this->Insert(Record<TKey, TVal>(key, val));
         }
@@ -106,8 +104,6 @@ public:
     {
         MergeSortRec(0, this->DataCount - 1);
     }
-
-   
 
 private:
     void QSortRec(int start, int finish)
@@ -173,7 +169,4 @@ private:
         MergeSortRec(middle + 1, right);
         Merge(left, middle, right);
     }
-
-
 };
-

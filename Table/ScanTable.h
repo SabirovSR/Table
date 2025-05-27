@@ -44,7 +44,6 @@ public:
         this->DataCount++;
     }
 
-
     void Delete(TKey key) override
     {
         if (!this->Find(key)) {
@@ -88,6 +87,4 @@ public:
     Record<TKey, TVal> getCurr() override { return this->pRec[this->Curr]; }
     TKey getCurrKey() override { return this->pRec[this->Curr].key; }
     TVal getCurrVal() override { return this->pRec[this->Curr].val; }
-
 };
-

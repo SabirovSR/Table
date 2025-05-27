@@ -132,4 +132,3 @@ public:
         this->Curr = 0;
     }
 };
-

@@ -1,4 +1,3 @@
-
 #pragma once
 #include "Table.h"
 #include "TreeTable.h"
@@ -18,14 +17,13 @@ protected:
 		bool isBalanced;
 		int height;
 	};
-
 			
 	int InsBalTree(TreeNode<TKey, TVal>*& pNode, Record<TKey, TVal> rec) {
 		if (pNode == nullptr) {
 			pNode = new TreeNode<TKey, TVal>(rec);
 			pNode->bal = BalOK;
 			this->DataCount++;
-			return H_INC; // ������ �������
+			return H_INC;
 		}
 		this->Eff++;
 		int res = H_OK;
@@ -70,8 +68,6 @@ protected:
 		}
 		return res;
 	}
-
-
 
 	int DelBalTree(TreeNode<TKey, TVal>*& pNode, TKey key)
 	{
@@ -127,8 +123,6 @@ protected:
 		return res;
 	}
 
-
-
 	TreeNode<TKey, TVal>* FindMin(TreeNode<TKey, TVal>* pNode)  {
 		if (!pNode)
 		{
@@ -140,8 +134,6 @@ protected:
 		}
 		return pNode;
 	}
-
-
 
 	int RemoveMin(TreeNode<TKey, TVal>*& pNode)
 	{
@@ -223,9 +215,6 @@ protected:
 		return res;
 	}
 
-
-
-
 	int BalTreeLeft(TreeNode<TKey, TVal>*& pNode) {
 		int res = H_OK;
 		if (pNode->bal == BalRight)
@@ -287,19 +276,37 @@ protected:
 		delete pNode;
 	}
 
-	void PrintNode(ostream& os, TreeNode<TKey, TVal>* p, string prefix = "", bool isLeft = true) {
+	void PrintNode(ostream& os, TreeNode<TKey, TVal>* p, int level = 0, string prefix = "", bool isLarger = false) {
 		if (p == nullptr) return;
 
+		// Сначала выводим правое поддерево (большие значения)
+		PrintNode(os, p->pRight, level + 1, prefix + "    ", true);
+
+		// Выводим текущий узел
 		os << prefix;
-		os << (isLeft ? "|--" : "\\--");
-		os << p->rec.key << "(" << p->bal << "): " << p->rec.val << endl;
-
-		string childPrefix = prefix + (isLeft ? "|   " : "    ");
-
+		if (level > 0) {
+			os << (isLarger ? "┌── " : "└── ");
+		}
 		
-		PrintNode(os, p->pRight, childPrefix, false);
+		// Выводим узел с информацией о балансе
+		os << p->rec.key;
 		
-		PrintNode(os, p->pLeft, childPrefix, true);
+		// Добавляем индикацию баланса
+		switch (p->bal) {
+			case BalLeft:
+				os << " [←]";  // Левое поддерево выше
+				break;
+			case BalRight:
+				os << " [→]";  // Правое поддерево выше
+				break;
+			default:
+				os << " [=]";  // Сбалансировано
+		}
+		
+		os << " (" << p->rec.val << ")" << endl;
+
+		// Затем выводим левое поддерево (меньшие значения)
+		PrintNode(os, p->pLeft, level + 1, prefix + "    ", false);
 	}
 
 public:
@@ -318,7 +325,6 @@ public:
 		return this->pRoot == nullptr;
 	}
 
-
 	void Insert(Record<TKey, TVal> rec)
 
 	{
@@ -327,7 +333,6 @@ public:
 		}
 		InsBalTree(this->pRoot, rec);
 	}
-
 
 	void Delete(TKey key) 
 	{
@@ -357,10 +362,22 @@ public:
 	}
 
 	void PrintTree(ostream& os = cout) {
+		if (this->pRoot == nullptr) {
+			os << "Пустое дерево\n";
+			return;
+		}
+		os << "Сбалансированное дерево:\n";
+		os << "↑ Большие значения (┌──)\n";
+		os << "↓ Меньшие значения (└──)\n\n";
+		
 		PrintNode(os, this->pRoot);
+		
+		os << "\nЛегенда:\n";
+		os << "[=] - узел сбалансирован\n";
+		os << "[←] - левое поддерево выше\n";
+		os << "[→] - правое поддерево выше\n";
 	}
 
-	
 	~BalTreeTable() {
 		DestroyNode(this->pRoot);
 	}

@@ -95,8 +95,6 @@ public:
         this->CurrList = -1;
     }
 
- 
-
     void Reset() override
     {
         this->CurrList = 0;
@@ -169,6 +167,3 @@ public:
 
 
 };
-
-
-
