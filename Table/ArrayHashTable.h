@@ -66,14 +66,32 @@ public:
 
     void Delete(TKey key) override
     {
-        if (this->Find(key)) {
-            this->pRec[this->Curr] = this->Del;
-            this->DataCount--;
-            this->Eff++;
-        }
-        else {
+        if (!this->Find(key)) {
             throw "Key not found";
         }
+
+        // Сохраняем позицию удаляемого элемента
+        int delPos = this->Curr;
+        this->pRec[delPos] = this->Del;
+        this->DataCount--;
+
+        // Перестраиваем цепочку
+        int nextPos = (delPos + this->step) % this->size;
+        while (this->pRec[nextPos].key != this->Free.key) {
+            // Если следующий элемент не удален и не свободен
+            if (this->pRec[nextPos].key != this->Del.key) {
+                int correctPos = this->HashFunc(this->pRec[nextPos].key);
+                // Если элемент находится не на своем месте
+                if (correctPos != nextPos) {
+                    // Перемещаем элемент на правильную позицию
+                    this->pRec[delPos] = this->pRec[nextPos];
+                    this->pRec[nextPos] = this->Del;
+                    delPos = nextPos;
+                }
+            }
+            nextPos = (nextPos + this->step) % this->size;
+        }
+        this->Eff++;
     }
 
     void Reset() override

@@ -31,14 +31,16 @@ public:
     bool Find(TKey key) override
     {
         this->CurrList = this->HashFunc(key);
+        //this->Eff++; // Учитываем операцию вычисления хеша и доступа к списку
+        
         for (this->CurrI = this->pList[this->CurrList].begin();
             this->CurrI != this->pList[this->CurrList].end();
             ++this->CurrI)
         {
+            //this->Eff++; // Учитываем каждое сравнение ключа
             if (this->CurrI->key == key) {
                 return true;
             }
-            this->Eff++;
         }
         return false;
     }

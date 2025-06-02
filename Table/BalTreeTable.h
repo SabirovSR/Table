@@ -276,37 +276,42 @@ protected:
 		delete pNode;
 	}
 
-	void PrintNode(ostream& os, TreeNode<TKey, TVal>* p, int level = 0, string prefix = "", bool isLarger = false) {
-		if (p == nullptr) return;
+	void PrintNode(TreeNode<TKey, TVal>* node, int level, bool isRight, const string& prefix) {
+		if (!node) return;
 
-		// Сначала выводим правое поддерево (большие значения)
-		PrintNode(os, p->pRight, level + 1, prefix + "    ", true);
+		// Определяем символы для отрисовки связей
+		const string horizontal = "──";
+		const string vertical = "│  ";
+		const string cornerRight = "┌──";
+		const string cornerLeft = "└──";
+		const string empty = "   ";
+
+		// Отрисовываем правую ветвь (верхнюю часть)
+		PrintNode(node->pRight, level + 1, true, prefix + (isRight ? empty : vertical));
 
 		// Выводим текущий узел
-		os << prefix;
-		if (level > 0) {
-			os << (isLarger ? "┌── " : "└── ");
-		}
+		cout << prefix;
+		cout << (isRight ? cornerRight : cornerLeft);
 		
 		// Выводим узел с информацией о балансе
-		os << p->rec.key;
+		cout << node->rec.key;
 		
 		// Добавляем индикацию баланса
-		switch (p->bal) {
+		switch (node->bal) {
 			case BalLeft:
-				os << " [←]";  // Левое поддерево выше
+				cout << " [←]";  // Левое поддерево выше
 				break;
 			case BalRight:
-				os << " [→]";  // Правое поддерево выше
+				cout << " [→]";  // Правое поддерево выше
 				break;
 			default:
-				os << " [=]";  // Сбалансировано
+				cout << " [=]";  // Сбалансировано
 		}
 		
-		os << " (" << p->rec.val << ")" << endl;
+		cout << " (" << node->rec.val << ")" << endl;
 
-		// Затем выводим левое поддерево (меньшие значения)
-		PrintNode(os, p->pLeft, level + 1, prefix + "    ", false);
+		// Отрисовываем левую ветвь (нижнюю часть)
+		PrintNode(node->pLeft, level + 1, false, prefix + (isRight ? vertical : empty));
 	}
 
 public:
@@ -368,9 +373,10 @@ public:
 		}
 		os << "Сбалансированное дерево:\n";
 		os << "↑ Большие значения (┌──)\n";
-		os << "↓ Меньшие значения (└──)\n\n";
+		os << "↓ Меньшие значения (└──)\n";
+		os << "│ - связь между узлами\n\n";
 		
-		PrintNode(os, this->pRoot);
+		PrintNode(this->pRoot, 0, false, "");
 		
 		os << "\nЛегенда:\n";
 		os << "[=] - узел сбалансирован\n";

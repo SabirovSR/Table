@@ -40,7 +40,7 @@ template<typename TKey, typename TVal>
 std::ostream& operator<<(std::ostream& os, Table<TKey, TVal>& tab)
 {
     tab.Reset();
-  
+
     while (!tab.IsEnd())
     {
         os << "Ключ: " << tab.getCurrKey() << ", Значение: " << tab.getCurrVal() << '\n';

@@ -36,7 +36,7 @@ enum TTabMode {
     SCAN_TABLE = 1,     // Последовательная таблица
     SORT_TABLE = 2,     // Отсортированная таблица
     HASH_TABLE1 = 3,    // Хеш-таблица
-    HASH_TABLE2 = 4,    // Хеш-таблица с цепочками
+    HASH_TABLE2 = 4,    // Хеш-таблица с list
     TREE_TABLE = 5,     // Дерево
     BAL_TREE_TABLE = 6  // Сбалансированное дерево
 };
@@ -77,7 +77,7 @@ void showCursor() {
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
 
-//// Выводит текст по центру экрана
+// Выводит текст по центру экрана
 void printCentered(const string& text, int y) {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -86,26 +86,6 @@ void printCentered(const string& text, int y) {
     setCursorPosition(x, y);
     cout << text;
 }
-//void printCentered(const string& text, int y) {
-//    // Получаем информацию о размерах консоли
-//    CONSOLE_SCREEN_BUFFER_INFO csbi;
-//    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-//    int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-//    
-//    // Удаляем лишние пробелы и табуляции в начале и конце текста
-//    string trimmedText = text;
-//    while (!trimmedText.empty() && (trimmedText[0] == ' ' || trimmedText[0] == '\t')) {
-//        trimmedText.erase(0, 1);
-//    }
-//    while (!trimmedText.empty() && (trimmedText.back() == ' ' || trimmedText.back() == '\t')) {
-//        trimmedText.pop_back();
-//    }
-//    
-//    // Вычисляем позицию для центрирования текста
-//    int x = (width - trimmedText.length()) / 2;
-//    setCursorPosition(x, y);
-//    cout << trimmedText;
-//}
 
 // Выводит пункт меню с подсветкой выбранного элемента
 void printMenuOption(const string& text, int x, int y, bool selected) {
@@ -130,7 +110,7 @@ string getTableTypeName(TTabMode mode) {
         case HASH_TABLE1:
             return "Хеш-таблица";
         case HASH_TABLE2:
-            return "Хеш-таблица с цепочками";
+            return "Хеш-таблица на list";
         case TREE_TABLE:
             return "Дерево";
         case BAL_TREE_TABLE:
@@ -509,7 +489,7 @@ int main() {
         "Последовательная таблица",
         "Отсортированная таблица",
         "Хеш-таблица",
-        "Хеш-таблица с цепочками",
+        "Хеш-таблица на list",
         "Дерево",
         "Сбалансированное дерево"
     };
