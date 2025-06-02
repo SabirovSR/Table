@@ -37,7 +37,7 @@ public:
             this->CurrI != this->pList[this->CurrList].end();
             ++this->CurrI)
         {
-            //this->Eff++; // Учитываем каждое сравнение ключа
+            this->Eff++; // Учитываем каждое сравнение ключа
             if (this->CurrI->key == key) {
                 return true;
             }

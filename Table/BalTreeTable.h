@@ -9,6 +9,11 @@ using namespace std;
 #define H_INC	  1
 #define H_DEC	 -1
 
+enum MODE {
+	INSERT,
+	DELETE
+};
+
 template<typename TKey, typename TVal>
 class BalTreeTable : public TreeTable <TKey, TVal> {
 protected:
@@ -77,11 +82,11 @@ protected:
 
 		if (key < pNode->rec.key) {
 			int tmp = DelBalTree(pNode->pLeft, key);
-			if (tmp == H_DEC) res = BalTreeRight(pNode);
+			if (tmp == H_DEC) res = BalTreeRight(pNode, DELETE);
 		}
 		else if (key > pNode->rec.key) {
 			int tmp = DelBalTree(pNode->pRight, key);
-			if (tmp == H_DEC) res = BalTreeLeft(pNode);
+			if (tmp == H_DEC) res = BalTreeLeft(pNode, DELETE);
 		}
 		else {
 			this->DataCount--;
@@ -115,7 +120,7 @@ protected:
 				int tmp = RemoveMin(pNode->pRight);
 				if (tmp == H_DEC)
 				{
-					res = BalTreeLeft(pNode);
+					res = BalTreeLeft(pNode, DELETE);
 				}
 				this->Eff++;
 			}
@@ -155,115 +160,206 @@ protected:
 			int tmp = RemoveMin(pNode->pLeft);
 			if (tmp == H_DEC)
 			{
-				res = BalTreeRight(pNode);
+				res = BalTreeRight(pNode, DELETE);
 			}
 		}
 		return res;
 	}
 
 
-	int BalTreeRight(TreeNode<TKey, TVal>*& pNode) {
+	int BalTreeRight(TreeNode<TKey, TVal>*& pNode, MODE mode = INSERT) {
 		int res = H_OK;
-		if (pNode->bal == BalLeft)
-		{
-			pNode->bal = BalOK;
-		}
-		else if (pNode->bal == BalOK)
-		{
-			pNode->bal = BalRight;
-			res = H_INC;
-		}
-		else {
-			TreeNode<TKey, TVal>* pR = pNode->pRight;
-			if (pR->bal == BalRight)
-			{
-				pNode->pRight = pR->pLeft;
-				pR->pLeft = pNode;
+		if (mode == INSERT) {
+			if (pNode->bal == BalLeft) {
 				pNode->bal = BalOK;
-				pR->bal = BalOK;
-				pNode = pR;
-				this->Eff += 2;
 			}
-			else if (pR->bal == BalLeft)
-			{
-				TreeNode<TKey, TVal>* pL = pR->pLeft;
-				pR->pLeft = pL->pRight;
-				pL->pRight = pR;
-				pNode->pRight = pL->pLeft;
-				pL->pLeft = pNode;
+			else if (pNode->bal == BalOK) {
+				pNode->bal = BalRight;
+				res = H_INC;
+			}
+			else {
+				TreeNode<TKey, TVal>* pR = pNode->pRight;
+				if (pR->bal == BalRight) {
+					pNode->pRight = pR->pLeft;
+					pR->pLeft = pNode;
+					pNode->bal = BalOK;
+					pR->bal = BalOK;
+					pNode = pR;
+					this->Eff += 2;
+				}
+				else if (pR->bal == BalLeft) {
+					TreeNode<TKey, TVal>* pL = pR->pLeft;
+					pR->pLeft = pL->pRight;
+					pL->pRight = pR;
+					pNode->pRight = pL->pLeft;
+					pL->pLeft = pNode;
 
-				if (pL->bal == BalRight)
-				{
-					pNode->bal = BalLeft;
-					pR->bal = BalOK;
+					if (pL->bal == BalRight) {
+						pNode->bal = BalLeft;
+						pR->bal = BalOK;
+					}
+					else if (pL->bal == BalLeft) {
+						pNode->bal = BalOK;
+						pR->bal = BalRight;
+					}
+					else {
+						pNode->bal = BalOK;
+						pR->bal = BalOK;
+					}
+					pL->bal = BalOK;
+					pNode = pL;
+					this->Eff += 4;
 				}
-				else if (pL->bal == BalLeft)
-				{
-					pNode->bal = BalOK;
-					pR->bal = BalRight;
+			}
+		}
+		else if (mode == DELETE) {
+			if (pNode->bal == BalLeft) {
+				pNode->bal = BalOK;
+				res = H_DEC;
+			}
+			else if (pNode->bal == BalOK) {
+				pNode->bal = BalRight;
+				res = H_OK;
+			}
+			else {
+				TreeNode<TKey, TVal>* pR = pNode->pRight;
+				if (pR->bal != BalLeft) {
+					pNode->pRight = pR->pLeft;
+					pR->pLeft = pNode;
+					if (pR->bal == BalOK) {
+						pNode->bal = BalRight;
+						pR->bal = BalLeft;
+						res = H_OK;
+					}
+					else {
+						pNode->bal = BalOK;
+						pR->bal = BalOK;
+						res = H_DEC;
+					}
+					pNode = pR;
 				}
-				else
-				{
-					pNode->bal = BalOK;
-					pR->bal = BalOK;
+				else {
+					TreeNode<TKey, TVal>* pL = pR->pLeft;
+					pR->pLeft = pL->pRight;
+					pL->pRight = pR;
+					pNode->pRight = pL->pLeft;
+					pL->pLeft = pNode;
+
+					if (pL->bal == BalRight) {
+						pNode->bal = BalLeft;
+						pR->bal = BalOK;
+					}
+					else if (pL->bal == BalLeft) {
+						pNode->bal = BalOK;
+						pR->bal = BalRight;
+					}
+					else {
+						pNode->bal = BalOK;
+						pR->bal = BalOK;
+					}
+					pL->bal = BalOK;
+					pNode = pL;
+					res = H_DEC;
 				}
-				pL->bal = BalOK;
-				pNode = pL;
-				this->Eff += 4;
 			}
 		}
 		return res;
 	}
 
-	int BalTreeLeft(TreeNode<TKey, TVal>*& pNode) {
+	int BalTreeLeft(TreeNode<TKey, TVal>*& pNode, MODE mode = INSERT) {
 		int res = H_OK;
-		if (pNode->bal == BalRight)
-		{
-			pNode->bal = BalOK;
-		}
-		else if (pNode->bal == BalOK)
-		{
-			pNode->bal = BalLeft;
-			res = H_INC;
-		}
-		else
-		{
-			TreeNode<TKey, TVal>* pL = pNode->pLeft;
-			if (pL->bal == BalLeft)
-			{
-				pNode->pLeft = pL->pRight;
-				pL->pRight = pNode;
+		if (mode == INSERT) {
+			if (pNode->bal == BalRight) {
 				pNode->bal = BalOK;
-				pL->bal = BalOK;
-				pNode = pL;
-				this->Eff += 2;
 			}
-			else if (pL->bal == BalRight)
-			{
-				TreeNode<TKey, TVal>* pR = pL->pRight;
-				pL->pRight = pR->pLeft;
-				pR->pLeft = pL;
-				pNode->pLeft = pR->pRight;
-				pR->pRight = pNode;
+			else if (pNode->bal == BalOK) {
+				pNode->bal = BalLeft;
+				res = H_INC;
+			}
+			else {
+				TreeNode<TKey, TVal>* pL = pNode->pLeft;
+				if (pL->bal == BalLeft) {
+					pNode->pLeft = pL->pRight;
+					pL->pRight = pNode;
+					pNode->bal = BalOK;
+					pL->bal = BalOK;
+					pNode = pL;
+					this->Eff += 2;
+				}
+				else if (pL->bal == BalRight) {
+					TreeNode<TKey, TVal>* pR = pL->pRight;
+					pL->pRight = pR->pLeft;
+					pR->pLeft = pL;
+					pNode->pLeft = pR->pRight;
+					pR->pRight = pNode;
 
-				if (pR->bal == BalLeft)
-				{
-					pNode->bal = BalRight;
-					pL->bal = BalOK;
+					if (pR->bal == BalLeft) {
+						pNode->bal = BalRight;
+						pL->bal = BalOK;
+					}
+					else if (pR->bal == BalRight) {
+						pNode->bal = BalOK;
+						pL->bal = BalLeft;
+					}
+					else {
+						pNode->bal = BalOK;
+						pL->bal = BalOK;
+					}
+					pR->bal = BalOK;
+					pNode = pR;
+					this->Eff += 4;
 				}
-				else if (pR->bal == BalRight)
-				{
-					pNode->bal = BalOK;
-					pL->bal = BalLeft;
+			}
+		}
+		else if (mode == DELETE) {
+			if (pNode->bal == BalRight) {
+				pNode->bal = BalOK;
+				res = H_DEC;
+			}
+			else if (pNode->bal == BalOK) {
+				pNode->bal = BalLeft;
+				res = H_OK;
+			}
+			else {
+				TreeNode<TKey, TVal>* pL = pNode->pLeft;
+				if (pL->bal != BalRight) {
+					pNode->pLeft = pL->pRight;
+					pL->pRight = pNode;
+					if (pL->bal == BalOK) {
+						pNode->bal = BalLeft;
+						pL->bal = BalRight;
+						res = H_OK;
+					}
+					else {
+						pNode->bal = BalOK;
+						pL->bal = BalOK;
+						res = H_DEC;
+					}
+					pNode = pL;
 				}
-				else
-				{
-					pNode->bal = BalOK;
-					pL->bal = BalOK;
+				else {
+					TreeNode<TKey, TVal>* pR = pL->pRight;
+					pL->pRight = pR->pLeft;
+					pR->pLeft = pL;
+					pNode->pLeft = pR->pRight;
+					pR->pRight = pNode;
+
+					if (pR->bal == BalLeft) {
+						pNode->bal = BalRight;
+						pL->bal = BalOK;
+					}
+					else if (pR->bal == BalRight) {
+						pNode->bal = BalOK;
+						pL->bal = BalLeft;
+					}
+					else {
+						pNode->bal = BalOK;
+						pL->bal = BalOK;
+					}
+					pR->bal = BalOK;
+					pNode = pR;
+					res = H_DEC;
 				}
-				pR->bal = BalOK;
-				pNode = pR;
-				this->Eff += 4;
 			}
 		}
 		return res;
