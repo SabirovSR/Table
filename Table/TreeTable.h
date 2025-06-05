@@ -153,30 +153,40 @@ public:
         return pos >= this->DataCount;
     }
 
-    void PrintRec(ostream& os, TreeNode<TKey, TVal>* p, string prefix = "", bool isLeft = true) {
-        if (p == nullptr) return;
+    void PrintRec(ostream& os, TreeNode<TKey, TVal>* node, int level, bool isRight, const string& prefix) {
+        if (!node) return;
 
+        // Определяем символы для отрисовки связей
+        const string horizontal = "──";
+        const string vertical = "│  ";
+        const string cornerRight = "┌──";
+        const string cornerLeft = "└──";
+        const string empty = "   ";
+
+        // Отрисовываем правую ветвь (верхнюю часть)
+        PrintRec(os, node->pRight, level + 1, true, prefix + (isRight ? empty : vertical));
+
+        // Выводим текущий узел
         os << prefix;
-        os << (isLeft ? "└── " : "┌── ");
-        os << p->rec.key << " (" << p->rec.val << ")" << endl;
+        os << (isRight ? cornerRight : cornerLeft);
 
-        string childPrefix = prefix + (isLeft ? "    " : "│   ");
-        
-        // Сначала выводим правое поддерево (большие значения)
-        PrintRec(os, p->pRight, childPrefix, false);
-        // Затем выводим левое поддерево (меньшие значения)
-        PrintRec(os, p->pLeft, childPrefix, true);
+        // Выводим узел с информацией о балансе
+        os << node->rec.key;
+
+        os << " (" << node->rec.val << ")" << endl;
+
+        // Отрисовываем левую ветвь (нижнюю часть)
+        PrintRec(os, node->pLeft, level + 1, false, prefix + (isRight ? vertical : empty));
     }
 
     void Print(ostream& os) {
-        if (pRoot == nullptr) {
+        if (this->pRoot == nullptr) {
             os << "Пустое дерево\n";
             return;
         }
-        os << "Дерево (большие значения сверху, меньшие снизу):\n";
-        os << "┌── " << pRoot->rec.key << " (" << pRoot->rec.val << ")" << endl;
-        PrintRec(os, pRoot->pRight, "│   ", false);
-        PrintRec(os, pRoot->pLeft, "│   ", true);
+        os << "Дерево:\n\n";
+
+        PrintRec(os, this->pRoot, 0, false, "");
     }
 
     Record<TKey, TVal> getCurr() override {

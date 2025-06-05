@@ -130,7 +130,6 @@
     <ClCompile Include="BalTreeTable.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SortTable.h" />
-    <ClCompile Include="Table.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayHashTable.h" />

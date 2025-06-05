@@ -180,7 +180,7 @@ void PrintTable(Table<TKey, TVal>& table, const string& tableName) {
 Table<int, string>* pTab = nullptr;
 int* pKeys = nullptr;
 string* pVals = nullptr;
-int DataCount = 0, MemSize = 0;
+int DataCount = 0;
 
 void CreateTable(TTabMode mode) {
     int MaxKey;
@@ -232,17 +232,15 @@ void CreateTable(TTabMode mode) {
         break;
     }
 
-    MemSize = DataCount + 1;  
-
     switch (mode) {
     case SCAN_TABLE:
-        pTab = new ScanTable<int, string>(MemSize);
+        pTab = new ScanTable<int, string>(DataCount);
         break;
     case SORT_TABLE:
-        pTab = new SortTable<int, string>(MemSize);
+        pTab = new SortTable<int, string>(DataCount);
         break;
     case HASH_TABLE1:
-        pTab = new ArrayHashTable<int, string>(MemSize);
+        pTab = new ArrayHashTable<int, string>(DataCount);
         break;
     case HASH_TABLE2:
         pTab = new ListHashTable<int, string>(DataCount);
@@ -255,8 +253,8 @@ void CreateTable(TTabMode mode) {
         break;
     }
 
-    pKeys = new int[MemSize];
-    pVals = new string[MemSize];
+    pKeys = new int[DataCount];
+    pVals = new string[DataCount];
 
     try {
         pTab->fillTab(DataCount, MaxKey);

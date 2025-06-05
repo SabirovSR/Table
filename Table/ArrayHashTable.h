@@ -18,13 +18,18 @@ public:
     ArrayHashTable(int _size, int _step = 13) : HashTable<TKey, TVal>(_size)
     {
         this->step = _step;
+
         this->pRec = new Record<TKey, TVal>[this->size];
         this->Free = Record<TKey, TVal>{ TKey(), TVal() };
         this->Del = Record<TKey, TVal>{ TKey(), TVal() };
+
         for (int i = 0; i < this->size; i++) {
             this->pRec[i] = this->Free;
         }
-        this->Curr = 0;
+
+        this->Curr = -1;
+        this->Free.key = -1;
+        this->Del.key = -2; 
     }
 
     ~ArrayHashTable()
@@ -37,15 +42,27 @@ public:
     bool Find(TKey key) override
     {
         this->Curr = this->HashFunc(key);
+
         int tmp = -1;
+
         for (int i = 0; i < this->size; i++) {
             this->Eff++;
-            if (this->pRec[this->Curr].key == this->Free.key) break;
-            else if (this->pRec[this->Curr].key == this->Del.key && tmp == -1) tmp = this->Curr;
-            else if (this->pRec[this->Curr].key == key) return true;
+
+            if (this->pRec[this->Curr].key == this->Free.key) 
+                break;
+
+            if (this->pRec[this->Curr].key == this->Del.key && tmp == -1)
+				tmp = this->Curr;
+       		else 
+       			if (this->pRec[this->Curr].key == key) 
+					return true;
+
             this->Curr = (this->Curr + this->step) % this->size;
         }
-        if (tmp != -1) this->Curr = tmp;
+
+        if (tmp != -1) 
+            this->Curr = tmp;
+
         return false;
     }
 
@@ -79,19 +96,25 @@ public:
     void Reset() override
     {
         this->Curr = 0;
-        while ((this->Curr < this->size) &&
-            (this->pRec[this->Curr].key == this->Del.key ||
-                this->pRec[this->Curr].key == this->Free.key)) {
+
+        while (this->Curr < this->size 
+           && (this->pRec[this->Curr].key == this->Del.key 
+			|| this->pRec[this->Curr].key == this->Free.key)) 
+        {
             this->Curr++;
         }
     }
 
     void GoNext() override
     {
+        if (this->Curr >= this->size) return;
+
         this->Curr++;
-        while ((this->Curr < this->size) &&
-            (this->pRec[this->Curr].key == this->Del.key ||
-                this->pRec[this->Curr].key == this->Free.key)) {
+
+        while (this->Curr < this->size 
+           && (this->pRec[this->Curr].key == this->Del.key 
+            || this->pRec[this->Curr].key == this->Free.key)) 
+        {
             this->Curr++;
         }
     }
@@ -117,7 +140,6 @@ public:
             } while (usedKeys[key]);
 
             usedKeys[key] = true;
-            //int val = rand() % 2000 - 1000;
             string val = "value_" + to_string(rand() % 1000);
             this->Insert(Record<TKey, TVal>(key, val));
         }

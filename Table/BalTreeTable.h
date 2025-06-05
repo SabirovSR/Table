@@ -3,6 +3,7 @@
 #include "TreeTable.h"
 #include <vector>
 #include <stdexcept>
+
 using namespace std;
 
 #define H_OK      0
@@ -372,7 +373,7 @@ protected:
 		delete pNode;
 	}
 
-	void PrintNode(TreeNode<TKey, TVal>* node, int level, bool isRight, const string& prefix) {
+	void PrintNode(ostream& os, TreeNode<TKey, TVal>* node, int level, bool isRight, const string& prefix) {
 		if (!node) return;
 
 		// Определяем символы для отрисовки связей
@@ -383,31 +384,31 @@ protected:
 		const string empty = "   ";
 
 		// Отрисовываем правую ветвь (верхнюю часть)
-		PrintNode(node->pRight, level + 1, true, prefix + (isRight ? empty : vertical));
+		PrintNode(os, node->pRight, level + 1, true, prefix + (isRight ? empty : vertical));
 
 		// Выводим текущий узел
-		cout << prefix;
-		cout << (isRight ? cornerRight : cornerLeft);
+		os << prefix;
+		os << (isRight ? cornerRight : cornerLeft);
 		
 		// Выводим узел с информацией о балансе
-		cout << node->rec.key;
+		os << node->rec.key;
 		
 		// Добавляем индикацию баланса
 		switch (node->bal) {
 			case BalLeft:
-				cout << " [←]";  // Левое поддерево выше
+				os << " [←]";  // Левое поддерево выше
 				break;
 			case BalRight:
-				cout << " [→]";  // Правое поддерево выше
+				os << " [→]";  // Правое поддерево выше
 				break;
 			default:
-				cout << " [=]";  // Сбалансировано
+				os << " [=]";  // Сбалансировано
 		}
 		
-		cout << " (" << node->rec.val << ")" << endl;
+		os << " (" << node->rec.val << ")" << endl;
 
 		// Отрисовываем левую ветвь (нижнюю часть)
-		PrintNode(node->pLeft, level + 1, false, prefix + (isRight ? vertical : empty));
+		PrintNode(os, node->pLeft, level + 1, false, prefix + (isRight ? vertical : empty));
 	}
 
 public:
@@ -472,7 +473,7 @@ public:
 		os << "↓ Меньшие значения (└──)\n";
 		os << "│ - связь между узлами\n\n";
 		
-		PrintNode(this->pRoot, 0, false, "");
+		PrintNode(os, this->pRoot, 0, false, "");
 		
 		os << "\nЛегенда:\n";
 		os << "[=] - узел сбалансирован\n";

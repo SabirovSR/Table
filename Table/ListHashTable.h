@@ -31,27 +31,31 @@ public:
     bool Find(TKey key) override
     {
         this->CurrList = this->HashFunc(key);
-        //this->Eff++; // Учитываем операцию вычисления хеша и доступа к списку
         
         for (this->CurrI = this->pList[this->CurrList].begin();
             this->CurrI != this->pList[this->CurrList].end();
-            ++this->CurrI)
+            this->CurrI++)
         {
             this->Eff++; // Учитываем каждое сравнение ключа
             if (this->CurrI->key == key) {
                 return true;
             }
         }
+
         return false;
     }
 
     void Insert(Record<TKey, TVal> rec) override
     {
-        int listIndex = this->HashFunc(rec.key);
         if (this->Find(rec.key)) {
             throw runtime_error("Key already exists");
         }
-        this->pList[listIndex].push_front(rec);
+
+        if (this->IsFull()) {
+            throw runtime_error("Table overflow");
+        }
+
+        this->pList[this->CurrList].push_front(rec);
         this->DataCount++;
         this->Eff++;
     }
@@ -61,6 +65,7 @@ public:
         if (!this->Find(key)) {
             throw runtime_error("Key not found");
         }
+
         this->pList[this->CurrList].erase(this->CurrI);
         this->DataCount--;
         this->Eff++;
@@ -82,7 +87,6 @@ public:
             } while (usedKeys[key]);
 
             usedKeys[key] = true;
-            //int val = rand() % 2000 - 1000;
             string val = "value_" + to_string(rand() % 1000);
             this->Insert(Record<TKey, TVal> (key, val));
         }
